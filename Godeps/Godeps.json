@@ -1,0 +1,11 @@
+{
+	"ImportPath": "github.com/idata-shopee/gopcp_rpc",
+	"GoVersion": "go1.11",
+	"GodepVersion": "v80",
+	"Deps": [
+		{
+			"ImportPath": "github.com/idata-shopee/goaio",
+			"Rev": "81d9f6ecc52d9e3fe73aee97e5c31e1b1978bb4a"
+		}
+	]
+}
