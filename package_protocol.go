@@ -19,7 +19,7 @@ func TextToPkt(text string) []byte {
 
 	// body size bytes
 	lenBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(lenBytes, uint32(lenOfTextBytes))
+	binary.BigEndian.PutUint32(lenBytes, uint32(lenOfTextBytes))
 	return append(append([]byte{0}, lenBytes...), bytes...)
 }
 
@@ -63,7 +63,7 @@ func (p *PackageProtocol) getSinglePkt() string {
 		return ""
 	}
 
-	bodyLen := binary.LittleEndian.Uint32(p.buffer[1:5])
+	bodyLen := binary.BigEndian.Uint32(p.buffer[1:5])
 	pktLen := headerLen + int(bodyLen)
 
 	if len(p.buffer) >= pktLen {

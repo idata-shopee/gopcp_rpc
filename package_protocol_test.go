@@ -28,7 +28,7 @@ func assertEqualBytes(t *testing.T, bytes1 []byte, bytes2 []byte) {
 }
 
 func TestBase(t *testing.T) {
-	assertEqualBytes(t, TextToPkt("hello"), []byte{0, 5, 0, 0, 0, 104, 101, 108, 108, 111})
+	assertEqualBytes(t, TextToPkt("hello"), []byte{0, 0, 0, 0, 5, 104, 101, 108, 108, 111})
 }
 
 func TestGetPktText(t *testing.T) {
