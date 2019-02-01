@@ -36,12 +36,16 @@ func simpleSandbox() *gopcp.Sandbox {
 			}
 			return v, nil
 		}),
+
+		"testError": gopcp.ToSandboxFun(func(args []interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+			return nil, errors.New("errrrorrr")
+		}),
 	}
 	sandBox := gopcp.GetSandbox(funcMap)
 	return sandBox
 }
 
-func testPCPRCPCallServer(t *testing.T, callResult gopcp.CallResult, expect interface{}) {
+func testPCPRCPCallServer(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}) {
 	server, err := GetPCPRPCServer(0, simpleSandbox())
 	if err != nil {
 		t.Errorf("fail to start server, %v", err)
@@ -58,21 +62,31 @@ func testPCPRCPCallServer(t *testing.T, callResult gopcp.CallResult, expect inte
 		defer client.Close()
 
 		ret, rerr := client.Call(callResult, 1000*time.Millisecond)
-		if rerr != nil {
+		if rerr != nil && !expectFail {
 			t.Errorf("call errored, %v", rerr)
+		} else {
+			assertEqual(t, ret, expect, "")
 		}
-
-		assertEqual(t, ret, expect, "")
 	}
 }
 
 func TestPCPRPCBase(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testPCPRCPCallServer(t, p.Call("add", 1, 2), 3.0)
-	testPCPRCPCallServer(t, p.Call("add", 1, 2, 3), 6.0)
+	testPCPRCPCallServer(false, t, p.Call("add", 1, 2), 3.0)
+	testPCPRCPCallServer(false, t, p.Call("add", 1, 2, 3), 6.0)
 }
 
 func TestPCPRPCBase2(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testPCPRCPCallServer(t, p.Call("sum", []int{1, 2, 3, 4, 5}), 15.0)
+	testPCPRCPCallServer(false, t, p.Call("sum", []int{1, 2, 3, 4, 5}), 15.0)
+}
+
+func TestPCPRPCError(t *testing.T) {
+	p := gopcp.PcpClient{}
+	testPCPRCPCallServer(true, t, p.Call("testError"), nil)
+}
+
+func TestPCPRPCMissingFun(t *testing.T) {
+	p := gopcp.PcpClient{}
+	testPCPRCPCallServer(true, t, p.Call("fakkkkkkkkkk"), nil)
 }
