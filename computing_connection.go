@@ -13,7 +13,7 @@ import (
 )
 
 type CommandData struct {
-	Value  interface{} `json:"value"`
+	Text   interface{} `json:"text"`
 	Errno  int         `json:"errno"`
 	ErrMsg string      `json:"errMsg"`
 }
@@ -50,7 +50,7 @@ func getErrorMessage(err error) string {
 
 func executeRequestCommand(requestCommand *CommandPkt, pcpServer *gopcp.PcpServer) (interface{}, error) {
 	// request command
-	text, ok := requestCommand.Data.Value.(string)
+	text, ok := requestCommand.Data.Text.(string)
 	if !ok {
 		return nil, errors.New("Expect string for request command.")
 	}
@@ -58,12 +58,12 @@ func executeRequestCommand(requestCommand *CommandPkt, pcpServer *gopcp.PcpServe
 	return pcpServer.Execute(text)
 }
 
-func packResponse(id string, value interface{}, err error) CommandPkt {
+func packResponse(id string, text interface{}, err error) CommandPkt {
 	var commandData *CommandData = nil
 	if err != nil {
-		commandData = &CommandData{value, 530, getErrorMessage(err)}
+		commandData = &CommandData{text, 530, getErrorMessage(err)}
 	} else {
-		commandData = &CommandData{value, 0, ""}
+		commandData = &CommandData{text, 0, ""}
 	}
 	return CommandPkt{id, RESPONSE_C_TYPE, *commandData}
 }
@@ -122,10 +122,10 @@ func (p *PCPConnectionHandler) onDataHelp(texts []string) {
 			}
 			// delete key
 			p.remoteCallMap.Delete(cmd.Id)
-			// pass value to channel
+			// pass to channel
 			ch, _ := ch_raw.(chan CallChannel)
 			if cmd.Data.Errno == 0 {
-				ch <- CallChannel{cmd.Data.Value, nil}
+				ch <- CallChannel{cmd.Data.Text, nil}
 			} else {
 				errText := cmd.Data.ErrMsg + "(" + strconv.Itoa(cmd.Data.Errno) + ")"
 				ch <- CallChannel{nil, errors.New(errText)}

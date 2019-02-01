@@ -2,6 +2,7 @@ package gopcp_rpc
 
 import (
 	"encoding/binary"
+	"fmt"
 	"github.com/idata-shopee/goaio"
 	"sync"
 )
@@ -34,6 +35,7 @@ type PackageProtocol struct {
 func (p *PackageProtocol) SendPackage(connHandler *goaio.ConnectionHandler, text string) error {
 	p.sentLock.Lock()
 	defer p.sentLock.Unlock()
+	fmt.Printf(text)
 	return connHandler.SendBytes(TextToPkt(text))
 }
 
