@@ -13,15 +13,15 @@ import (
 )
 
 type CommandData struct {
-	Value  interface{} `json:value`
-	Errno  int         `json:errno`
-	ErrMsg string      `json:errMsg`
+	Value  interface{} `json:"value"`
+	Errno  int         `json:"errno"`
+	ErrMsg string      `json:"errMsg"`
 }
 
 type CommandPkt struct {
-	Id    string      `json:id`
-	Ctype string      `json:ctype`
-	Data  CommandData `json:data`
+	Id    string      `json:"id"`
+	Ctype string      `json:"ctype"`
+	Data  CommandData `json:"data"`
 }
 
 func stringToCommand(text string) (*CommandPkt, error) {
@@ -83,7 +83,10 @@ type PCPConnectionHandler struct {
 
 func (p *PCPConnectionHandler) OnData(chunk []byte) {
 	texts := p.packageProtocol.GetPktText(chunk)
+	go p.onDataHelp(texts) // execute may be slow, need to run at a seperated goroutine
+}
 
+func (p *PCPConnectionHandler) onDataHelp(texts []string) {
 	for _, text := range texts {
 		cmd, err := stringToCommand(text)
 		if err != nil {
@@ -95,6 +98,7 @@ func (p *PCPConnectionHandler) OnData(chunk []byte) {
 
 		switch ctype := cmd.Ctype; ctype {
 		case REQUEST_C_TYPE:
+			// handle request from client
 			result, err := executeRequestCommand(cmd, p.pcpServer)
 			cmdText, cerr := commandToText(packResponse(cmd.Id, result, err))
 			if cerr != nil {
@@ -107,10 +111,12 @@ func (p *PCPConnectionHandler) OnData(chunk []byte) {
 				fmt.Printf("fail to sent package: %v", sentErr)
 				fmt.Println()
 			}
+
 		case RESPONSE_C_TYPE:
+			// handle response from server
 			ch_raw, ok := p.remoteCallMap.Load(cmd.Id)
 			if !ok {
-				fmt.Printf("missing-pkt-id: can not find id %v for purecall response data.", cmd.Id)
+				fmt.Printf("missing-pkt-id: can not find id %v in remote call map. Cmd content is %v. Normally, when timeout, the id also will be removed from remote call map.", cmd.Id, text)
 				fmt.Println()
 				return
 			}
@@ -145,22 +151,19 @@ func (p *PCPConnectionHandler) CallRemote(command string, timeout time.Duration)
 		return nil, cerr
 	}
 
-	// send package through connection
-	serr := p.packageProtocol.SendPackage(p.connHandler, cmdText)
-	if serr != nil {
-		return nil, serr
-	}
-
 	// register channel
 	ch := make(chan CallChannel)
 	p.remoteCallMap.Store(id, ch)
 
-	// timeout action
-	go (func() {
-		time.Sleep(timeout)
-		ch <- CallChannel{nil, errors.New("timeout for call. Command is " + command)}
+	// send package through connection
+	serr := p.packageProtocol.SendPackage(p.connHandler, cmdText)
+	if serr != nil {
 		p.remoteCallMap.Delete(id)
-	})()
+		return nil, serr
+	}
+
+	// timeout action
+	go p.timeoutChannel(id, ch, command, timeout)
 
 	// wait for channel
 	ret := <-ch
@@ -169,6 +172,12 @@ func (p *PCPConnectionHandler) CallRemote(command string, timeout time.Duration)
 		return nil, ret.err
 	}
 	return ret.data, nil
+}
+
+func (p *PCPConnectionHandler) timeoutChannel(id string, ch chan CallChannel, command string, timeout time.Duration) {
+	time.Sleep(timeout)
+	ch <- CallChannel{nil, errors.New("timeout for call. Command is " + command)}
+	// p.remoteCallMap.Delete(id)
 }
 
 func (p *PCPConnectionHandler) Call(list gopcp.CallResult, timeout time.Duration) (interface{}, error) {

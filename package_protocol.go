@@ -26,10 +26,14 @@ func TextToPkt(text string) []byte {
 type PackageProtocol struct {
 	buffer       []byte
 	bufferLocker *sync.Mutex
+
+	sentLock *sync.Mutex
 }
 
 // TODO sync?
 func (p *PackageProtocol) SendPackage(connHandler *goaio.ConnectionHandler, text string) error {
+	p.sentLock.Lock()
+	defer p.sentLock.Unlock()
 	return connHandler.SendBytes(TextToPkt(text))
 }
 
@@ -74,6 +78,7 @@ func (p *PackageProtocol) getSinglePkt() string {
 
 func GetPackageProtocol() *PackageProtocol {
 	var bytes []byte
-	var mutex = &sync.Mutex{}
-	return &PackageProtocol{bytes, mutex}
+	var bufferLock = &sync.Mutex{}
+	var sentLock = &sync.Mutex{}
+	return &PackageProtocol{bytes, bufferLock, sentLock}
 }

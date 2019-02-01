@@ -3,6 +3,7 @@ package gopcp_rpc
 import (
 	"errors"
 	"github.com/idata-shopee/gopcp"
+	"sync"
 	"testing"
 	"time"
 )
@@ -37,6 +38,11 @@ func simpleSandbox() *gopcp.Sandbox {
 			return v, nil
 		}),
 
+		"testSleep": gopcp.ToSandboxFun(func(args []interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+			time.Sleep(10 * time.Millisecond)
+			return 1, nil
+		}),
+
 		"testError": gopcp.ToSandboxFun(func(args []interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 			return nil, errors.New("errrrorrr")
 		}),
@@ -45,48 +51,117 @@ func simpleSandbox() *gopcp.Sandbox {
 	return sandBox
 }
 
-func testPCPRCPCallServer(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}) {
+func testPCPRPCCallServer(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, timeout time.Duration) {
 	server, err := GetPCPRPCServer(0, simpleSandbox())
 	if err != nil {
 		t.Errorf("fail to start server, %v", err)
 	}
 	defer server.Close()
 
-	for i := 1; i < 1000; i++ {
-		// create client
-		client, cerr := GetPCPRPCClient("127.0.0.1", server.GetPort(), func(e error) {})
+	// create client
+	client, cerr := GetPCPRPCClient("127.0.0.1", server.GetPort(), func(e error) {})
 
-		if cerr != nil {
-			t.Errorf("fail to start client, %v", cerr)
-		}
-		defer client.Close()
+	if cerr != nil {
+		t.Errorf("fail to start client, %v", cerr)
+	}
 
-		ret, rerr := client.Call(callResult, 1000*time.Millisecond)
+	defer client.Close()
+
+	// how many requests
+	count := 1000
+
+	var wg sync.WaitGroup
+	wg.Add(count)
+
+	runClient := func() {
+		defer wg.Done()
+		ret, rerr := client.Call(callResult, timeout)
 		if rerr != nil && !expectFail {
 			t.Errorf("call errored, %v", rerr)
 		} else {
 			assertEqual(t, ret, expect, "")
 		}
 	}
+
+	for i := 0; i < count; i++ {
+		go runClient()
+	}
+
+	wg.Wait()
+}
+
+func testPCPRPCPool(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, timeout time.Duration) {
+	server, err := GetPCPRPCServer(0, simpleSandbox())
+	if err != nil {
+		t.Errorf("fail to start server, %v", err)
+	}
+	defer server.Close()
+
+	pool := GetPCPRPCPool("127.0.0.1", server.GetPort(), 3000*time.Millisecond)
+
+	count := 1000
+
+	var wg sync.WaitGroup
+	wg.Add(count)
+
+	runClient := func() {
+		defer wg.Done()
+		// create client
+		item, cerr := pool.Get()
+		if cerr != nil {
+			t.Errorf("fail to get item from pool, %v", cerr)
+		}
+		client, ok := item.(*PCPConnectionHandler)
+		if !ok {
+			t.Errorf("can not convert client")
+		}
+
+		if cerr != nil {
+			t.Errorf("fail to start client, %v", cerr)
+		}
+
+		ret, rerr := client.Call(callResult, timeout)
+		if rerr != nil && !expectFail {
+			t.Errorf("call errored, %v", rerr)
+		} else {
+			assertEqual(t, ret, expect, "")
+		}
+	}
+
+	for i := 0; i < count; i++ {
+		go runClient()
+	}
+
+	wg.Wait()
+}
+
+func testRPC(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}) {
+	testPCPRPCCallServer(expectFail, t, callResult, expect, 15000*time.Millisecond)
+	testPCPRPCPool(expectFail, t, callResult, expect, 15000*time.Millisecond)
 }
 
 func TestPCPRPCBase(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testPCPRCPCallServer(false, t, p.Call("add", 1, 2), 3.0)
-	testPCPRCPCallServer(false, t, p.Call("add", 1, 2, 3), 6.0)
+	testRPC(false, t, p.Call("add", 1, 2), 3.0)
+	testRPC(false, t, p.Call("add", 1, 2, 3), 6.0)
 }
 
 func TestPCPRPCBase2(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testPCPRCPCallServer(false, t, p.Call("sum", []int{1, 2, 3, 4, 5}), 15.0)
+	testRPC(false, t, p.Call("sum", []int{1, 2, 3, 4, 5}), 15.0)
+}
+
+func TestPCPRPCSleep(t *testing.T) {
+	p := gopcp.PcpClient{}
+	testRPC(false, t, p.Call("testSleep"), 1.0)
 }
 
 func TestPCPRPCError(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testPCPRCPCallServer(true, t, p.Call("testError"), nil)
+	testRPC(true, t, p.Call("testError"), nil)
 }
 
 func TestPCPRPCMissingFun(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testPCPRCPCallServer(true, t, p.Call("fakkkkkkkkkk"), nil)
+	testRPC(true, t, p.Call("fakkkkkkkkkk"), nil)
 }
