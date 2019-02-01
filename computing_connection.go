@@ -144,6 +144,7 @@ func (p *PCPConnectionHandler) CallRemote(command string, timeout time.Duration)
 	if cerr != nil {
 		return nil, cerr
 	}
+
 	// send package through connection
 	serr := p.packageProtocol.SendPackage(p.connHandler, cmdText)
 	if serr != nil {
