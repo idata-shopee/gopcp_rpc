@@ -55,7 +55,7 @@ func executeRequestCommand(requestCommand *CommandPkt, pcpServer *gopcp.PcpServe
 		return nil, errors.New("Expect string for request command.")
 	}
 
-	return pcpServer.Execute(text)
+	return pcpServer.Execute(text, nil)
 }
 
 func packResponse(id string, text interface{}, err error) CommandPkt {

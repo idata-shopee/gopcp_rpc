@@ -10,7 +10,7 @@ import (
 
 func simpleSandbox() *gopcp.Sandbox {
 	funcMap := map[string]*gopcp.BoxFunc{
-		"add": gopcp.ToSandboxFun(func(args []interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+		"add": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 			var res float64
 			for _, arg := range args {
 				if val, ok := arg.(float64); !ok {
@@ -22,7 +22,7 @@ func simpleSandbox() *gopcp.Sandbox {
 			return res, nil
 		}),
 
-		"sum": gopcp.ToSandboxFun(func(args []interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+		"sum": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 			list, ok := args[0].([]interface{})
 			if !ok {
 				return nil, errors.New("args should be int list")
@@ -38,12 +38,12 @@ func simpleSandbox() *gopcp.Sandbox {
 			return v, nil
 		}),
 
-		"testSleep": gopcp.ToSandboxFun(func(args []interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+		"testSleep": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 			time.Sleep(10 * time.Millisecond)
 			return 1, nil
 		}),
 
-		"testError": gopcp.ToSandboxFun(func(args []interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+		"testError": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 			return nil, errors.New("errrrorrr")
 		}),
 	}
