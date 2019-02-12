@@ -4,7 +4,9 @@ import (
 	"github.com/idata-shopee/goaio"
 	"github.com/idata-shopee/gopcp"
 	"github.com/idata-shopee/gopool"
+	"log"
 	"net"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -55,14 +57,18 @@ func GetPCPRPCPool(host string, port int, duration time.Duration) gopool.Pool {
 		var remoteCallMap sync.Map
 		pcpConnectionHandler := PCPConnectionHandler{GetPackageProtocol(), pcpClient, pcpServer, nil, remoteCallMap}
 		tcpClient, err := goaio.GetTcpClient(host, port, pcpConnectionHandler.OnData, func(err error) {
+			log.Println("connection closed! host=" + host + ", port=" + strconv.Itoa(port))
 			onItemBoken()
 		})
+
 		pcpConnectionHandler.connHandler = &tcpClient
 
 		if err != nil {
+			log.Println("connect failed! host=" + host + ", port=" + strconv.Itoa(port))
 			return nil, err
 		}
 
+		log.Println("connected, host=" + host + ", port=" + strconv.Itoa(port))
 		return &gopool.Item{&pcpConnectionHandler, func() {
 			pcpConnectionHandler.Close()
 		}}, nil
