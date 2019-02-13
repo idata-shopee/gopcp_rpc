@@ -50,7 +50,7 @@ func GetPCPRPCClient(host string, port int, onClose OnCloseHandler) (*PCPConnect
 	return &pcpConnectionHandler, nil
 }
 
-func GetPCPRPCPool(host string, port int, duration time.Duration) gopool.Pool {
+func GetPCPRPCPool(host string, port int, poolSize int, duration time.Duration) gopool.Pool {
 	getNewItem := func(onItemBoken gopool.OnItemBorken) (*gopool.Item, error) {
 		pcpClient := gopcp.PcpClient{}
 		pcpServer := gopcp.NewPcpServer(gopcp.GetSandbox(map[string]*gopcp.BoxFunc{}))
@@ -73,5 +73,6 @@ func GetPCPRPCPool(host string, port int, duration time.Duration) gopool.Pool {
 			pcpConnectionHandler.Close()
 		}}, nil
 	}
-	return gopool.GetPool(getNewItem, 8, duration*time.Millisecond)
+
+	return gopool.GetPool(getNewItem, poolSize, duration*time.Millisecond)
 }

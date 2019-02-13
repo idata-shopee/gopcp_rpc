@@ -97,7 +97,7 @@ func testPCPRPCPool(expectFail bool, t *testing.T, callResult gopcp.CallResult, 
 	}
 	defer server.Close()
 
-	pool := GetPCPRPCPool("127.0.0.1", server.GetPort(), 3000*time.Millisecond)
+	pool := GetPCPRPCPool("127.0.0.1", server.GetPort(), 8, 3000*time.Millisecond)
 
 	count := 1000
 
