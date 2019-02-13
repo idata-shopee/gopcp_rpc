@@ -74,5 +74,5 @@ func GetPCPRPCPool(host string, port int, poolSize int, duration time.Duration) 
 		}}, nil
 	}
 
-	return gopool.GetPool(getNewItem, poolSize, duration*time.Millisecond)
+	return gopool.GetPool(getNewItem, poolSize, duration)
 }
