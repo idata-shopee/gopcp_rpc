@@ -19,9 +19,9 @@ func GetPCPRPCServer(port int, sandbox *gopcp.Sandbox) (*goaio.TcpServer, error)
 		pcpServer := gopcp.NewPcpServer(sandbox)
 		var remoteCallMap sync.Map
 		pcpConnectionHandler := PCPConnectionHandler{GetPackageProtocol(), pcpClient, pcpServer, nil, remoteCallMap}
-		connHandler := goaio.ConnectionHandler{conn, pcpConnectionHandler.OnData, func(err error) {
+		connHandler := goaio.GetConnectionHandler(conn, pcpConnectionHandler.OnData, func(err error) {
 			// TODO, handle when connection closed
-		}}
+		})
 
 		pcpConnectionHandler.connHandler = &connHandler
 		return connHandler
@@ -50,25 +50,26 @@ func GetPCPRPCClient(host string, port int, onClose OnCloseHandler) (*PCPConnect
 	return &pcpConnectionHandler, nil
 }
 
-func GetPCPRPCPool(host string, port int, poolSize int, duration time.Duration) gopool.Pool {
+func GetPCPRPCPool(host string, port int, poolSize int, duration time.Duration) *gopool.Pool {
 	getNewItem := func(onItemBoken gopool.OnItemBorken) (*gopool.Item, error) {
 		pcpClient := gopcp.PcpClient{}
 		pcpServer := gopcp.NewPcpServer(gopcp.GetSandbox(map[string]*gopcp.BoxFunc{}))
 		var remoteCallMap sync.Map
 		pcpConnectionHandler := PCPConnectionHandler{GetPackageProtocol(), pcpClient, pcpServer, nil, remoteCallMap}
+
 		tcpClient, err := goaio.GetTcpClient(host, port, pcpConnectionHandler.OnData, func(err error) {
-			log.Println("connection closed! host=" + host + ", port=" + strconv.Itoa(port))
+			log.Printf("connection closed! remote-host=%s, remote-port=%s, errMsg=%s\n", host, strconv.Itoa(port), err)
 			onItemBoken()
 		})
 
 		pcpConnectionHandler.connHandler = &tcpClient
 
 		if err != nil {
-			log.Println("connect failed! host=" + host + ", port=" + strconv.Itoa(port))
+			log.Printf("connect failed! host=%s, port=%s, errMsg=%s\n", host, strconv.Itoa(port), err)
 			return nil, err
 		}
 
-		log.Println("connected, host=" + host + ", port=" + strconv.Itoa(port))
+		log.Printf("connected host=%s, port=%s\n", host, strconv.Itoa(port))
 		return &gopool.Item{&pcpConnectionHandler, func() {
 			pcpConnectionHandler.Close()
 		}}, nil

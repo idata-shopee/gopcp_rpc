@@ -176,8 +176,8 @@ func (p *PCPConnectionHandler) CallRemote(command string, timeout time.Duration)
 
 func (p *PCPConnectionHandler) timeoutChannel(id string, ch chan CallChannel, command string, timeout time.Duration) {
 	time.Sleep(timeout)
-	ch <- CallChannel{nil, errors.New("timeout for call. Command is " + command)}
-	// p.remoteCallMap.Delete(id)
+	ch <- CallChannel{nil, errors.New("timeout for call. Command is " + command + " timeout=" + timeout.String())}
+	p.remoteCallMap.Delete(id)
 }
 
 func (p *PCPConnectionHandler) Call(list gopcp.CallResult, timeout time.Duration) (interface{}, error) {

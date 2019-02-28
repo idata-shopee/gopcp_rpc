@@ -39,7 +39,7 @@ func simpleSandbox() *gopcp.Sandbox {
 		}),
 
 		"testSleep": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(5 * time.Millisecond)
 			return 1, nil
 		}),
 
@@ -51,7 +51,8 @@ func simpleSandbox() *gopcp.Sandbox {
 	return sandBox
 }
 
-func testPCPRPCCallServer(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, timeout time.Duration) {
+// count: how many requests
+func testPCPRPCCallServer(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, timeout time.Duration, count int) {
 	server, err := GetPCPRPCServer(0, simpleSandbox())
 	if err != nil {
 		t.Errorf("fail to start server, %v", err)
@@ -66,9 +67,6 @@ func testPCPRPCCallServer(expectFail bool, t *testing.T, callResult gopcp.CallRe
 	}
 
 	defer client.Close()
-
-	// how many requests
-	count := 1000
 
 	var wg sync.WaitGroup
 	wg.Add(count)
@@ -90,16 +88,16 @@ func testPCPRPCCallServer(expectFail bool, t *testing.T, callResult gopcp.CallRe
 	wg.Wait()
 }
 
-func testPCPRPCPool(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, timeout time.Duration) {
+func testPCPRPCPool(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, timeout time.Duration, count int) {
 	server, err := GetPCPRPCServer(0, simpleSandbox())
 	if err != nil {
 		t.Errorf("fail to start server, %v", err)
 	}
+
+	pool := GetPCPRPCPool("127.0.0.1", server.GetPort(), 8, 30*time.Millisecond)
+	defer pool.Shutdown()
+
 	defer server.Close()
-
-	pool := GetPCPRPCPool("127.0.0.1", server.GetPort(), 8, 3000*time.Millisecond)
-
-	count := 1000
 
 	var wg sync.WaitGroup
 	wg.Add(count)
@@ -135,33 +133,33 @@ func testPCPRPCPool(expectFail bool, t *testing.T, callResult gopcp.CallResult, 
 	wg.Wait()
 }
 
-func testRPC(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}) {
-	testPCPRPCCallServer(expectFail, t, callResult, expect, 15000*time.Millisecond)
-	testPCPRPCPool(expectFail, t, callResult, expect, 15000*time.Millisecond)
+func testRPC(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, c1 int, c2 int) {
+	testPCPRPCCallServer(expectFail, t, callResult, expect, 1000*time.Millisecond, c1)
+	testPCPRPCPool(expectFail, t, callResult, expect, 15000*time.Millisecond, c2)
 }
 
 func TestPCPRPCBase(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testRPC(false, t, p.Call("add", 1, 2), 3.0)
-	testRPC(false, t, p.Call("add", 1, 2, 3), 6.0)
+	testRPC(false, t, p.Call("add", 1, 2), 3.0, 1000, 500)
+	testRPC(false, t, p.Call("add", 1, 2, 3), 6.0, 1000, 500)
 }
 
 func TestPCPRPCBase2(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testRPC(false, t, p.Call("sum", []int{1, 2, 3, 4, 5}), 15.0)
+	testRPC(false, t, p.Call("sum", []int{1, 2, 3, 4, 5}), 15.0, 500, 500)
 }
 
 func TestPCPRPCSleep(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testRPC(false, t, p.Call("testSleep"), 1.0)
+	testRPC(false, t, p.Call("testSleep"), 1.0, 500, 500)
 }
 
 func TestPCPRPCError(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testRPC(true, t, p.Call("testError"), nil)
+	testRPC(true, t, p.Call("testError"), nil, 500, 500)
 }
 
 func TestPCPRPCMissingFun(t *testing.T) {
 	p := gopcp.PcpClient{}
-	testRPC(true, t, p.Call("fakkkkkkkkkk"), nil)
+	testRPC(true, t, p.Call("fakkkkkkkkkk"), nil, 500, 500)
 }
