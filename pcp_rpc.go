@@ -13,7 +13,7 @@ import (
 
 type OnCloseHandler = func(error)
 
-func GetPCPRPCServer(port int, sandbox *gopcp.Sandbox) (goaio.TcpServer, error) {
+func GetPCPRPCServer(port int, sandbox *gopcp.Sandbox) (*goaio.TcpServer, error) {
 	tcpServer, err := goaio.GetTcpServer(port, func(conn net.Conn) goaio.ConnectionHandler {
 		pcpClient := gopcp.PcpClient{}
 		pcpServer := gopcp.NewPcpServer(sandbox)
