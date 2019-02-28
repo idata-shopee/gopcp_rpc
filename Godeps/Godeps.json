@@ -5,15 +5,15 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/idata-shopee/goaio",
-			"Rev": "81d9f6ecc52d9e3fe73aee97e5c31e1b1978bb4a"
+			"Rev": "4431828e5c16ceda71b0c92aa0ef3964916d1064"
 		},
 		{
 			"ImportPath": "github.com/idata-shopee/gopcp",
-			"Rev": "6f0d0e75d4d6635e4597fea4d0fb4ea4f7b96b93"
+			"Rev": "193cf9f567abb571730a33a3b55e4e1b497ad2e5"
 		},
 		{
 			"ImportPath": "github.com/idata-shopee/gopool",
-			"Rev": "3bb034c351c0e478492623c724190310dfb3037d"
+			"Rev": "2b432dcb5fc7aa50627e66cecc9190fac678fcd2"
 		},
 		{
 			"ImportPath": "github.com/satori/go.uuid",
