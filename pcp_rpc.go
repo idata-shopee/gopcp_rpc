@@ -53,7 +53,7 @@ func GetPCPRPCClient(host string, port int, onClose OnCloseHandler) (*PCPConnect
 // return host and port
 type GetAddress = func() (string, int, error)
 
-func GetPCPRPCPool(getAddress GetAddress, poolSize int, duration time.Duration) *gopool.Pool {
+func GetPCPRPCPool(getAddress GetAddress, poolSize int, duration time.Duration, retryDuration time.Duration) *gopool.Pool {
 	getNewItem := func(onItemBoken gopool.OnItemBorken) (*gopool.Item, error) {
 		if host, port, err := getAddress(); err != nil {
 			return nil, err
@@ -79,5 +79,5 @@ func GetPCPRPCPool(getAddress GetAddress, poolSize int, duration time.Duration) 
 		}
 	}
 
-	return gopool.GetPool(getNewItem, poolSize, duration)
+	return gopool.GetPool(getNewItem, poolSize, duration, retryDuration)
 }
