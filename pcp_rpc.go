@@ -50,29 +50,33 @@ func GetPCPRPCClient(host string, port int, onClose OnCloseHandler) (*PCPConnect
 	return &pcpConnectionHandler, nil
 }
 
-func GetPCPRPCPool(host string, port int, poolSize int, duration time.Duration) *gopool.Pool {
+// return host and port
+type GetAddress = func() (string, int, error)
+
+func GetPCPRPCPool(getAddress GetAddress, poolSize int, duration time.Duration) *gopool.Pool {
 	getNewItem := func(onItemBoken gopool.OnItemBorken) (*gopool.Item, error) {
-		pcpClient := gopcp.PcpClient{}
-		pcpServer := gopcp.NewPcpServer(gopcp.GetSandbox(map[string]*gopcp.BoxFunc{}))
-		var remoteCallMap sync.Map
-		pcpConnectionHandler := PCPConnectionHandler{GetPackageProtocol(), pcpClient, pcpServer, nil, remoteCallMap}
-
-		tcpClient, err := goaio.GetTcpClient(host, port, pcpConnectionHandler.OnData, func(err error) {
-			log.Printf("connection closed! remote-host=%s, remote-port=%s, errMsg=%s\n", host, strconv.Itoa(port), err)
-			onItemBoken()
-		})
-
-		pcpConnectionHandler.connHandler = &tcpClient
-
-		if err != nil {
-			log.Printf("connect failed! host=%s, port=%s, errMsg=%s\n", host, strconv.Itoa(port), err)
+		if host, port, err := getAddress(); err != nil {
 			return nil, err
-		}
+		} else {
+			pcpClient := gopcp.PcpClient{}
+			pcpServer := gopcp.NewPcpServer(gopcp.GetSandbox(map[string]*gopcp.BoxFunc{}))
+			var remoteCallMap sync.Map
+			pcpConnectionHandler := PCPConnectionHandler{GetPackageProtocol(), pcpClient, pcpServer, nil, remoteCallMap}
 
-		log.Printf("connected host=%s, port=%s\n", host, strconv.Itoa(port))
-		return &gopool.Item{&pcpConnectionHandler, func() {
-			pcpConnectionHandler.Close()
-		}}, nil
+			if tcpClient, err := goaio.GetTcpClient(host, port, pcpConnectionHandler.OnData, func(err error) {
+				log.Printf("connection closed! remote-host=%s, remote-port=%s, errMsg=%s\n", host, strconv.Itoa(port), err)
+				onItemBoken()
+			}); err != nil {
+				log.Printf("connect failed! host=%s, port=%s, errMsg=%s\n", host, strconv.Itoa(port), err)
+				return nil, err
+			} else {
+				pcpConnectionHandler.connHandler = &tcpClient
+				log.Printf("connected host=%s, port=%s\n", host, strconv.Itoa(port))
+				return &gopool.Item{&pcpConnectionHandler, func() {
+					pcpConnectionHandler.Close()
+				}}, nil
+			}
+		}
 	}
 
 	return gopool.GetPool(getNewItem, poolSize, duration)

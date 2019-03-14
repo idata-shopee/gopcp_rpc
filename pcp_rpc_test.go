@@ -94,7 +94,9 @@ func testPCPRPCPool(expectFail bool, t *testing.T, callResult gopcp.CallResult, 
 		t.Errorf("fail to start server, %v", err)
 	}
 
-	pool := GetPCPRPCPool("127.0.0.1", server.GetPort(), 8, 30*time.Millisecond)
+	pool := GetPCPRPCPool(func() (string, int, error) {
+		return "127.0.0.1", server.GetPort(), nil
+	}, 8, 30*time.Millisecond)
 	defer pool.Shutdown()
 
 	defer server.Close()
