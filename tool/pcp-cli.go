@@ -17,7 +17,9 @@ func main() {
 
 	// create client
 	if client, err := rpc.GetPCPRPCClient(*host, *port, func(e error) {
-		panic(e)
+		if e != nil {
+			panic(e)
+		}
 	}); err != nil {
 		panic(err)
 	} else {
