@@ -16,7 +16,9 @@ func main() {
 	flag.Parse()
 
 	// create client
-	if client, err := rpc.GetPCPRPCClient(*host, *port, func(e error) {}); err != nil {
+	if client, err := rpc.GetPCPRPCClient(*host, *port, func(e error) {
+		panic(e)
+	}); err != nil {
 		panic(err)
 	} else {
 		if ret, err := client.CallRemote(*text, time.Duration(*timeout)*time.Second); err != nil {
