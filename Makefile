@@ -1,6 +1,15 @@
 GOPATH := $(shell cd ../../../.. && pwd)
 export GOPATH
 
+init-dep:
+	@dep init
+
+status-dep:
+	@dep status
+
+ensure-dep:
+	@dep ensure
+
 test:
 	@go test -v -race
 
@@ -12,10 +21,10 @@ cover:
 	@go tool cover -html=coverage.out
 
 restore:
-	godep restore -v
+	@godep restore -v
 
 test-only:
-	go test -run $(CASE) -cover
+	@go test -run $(CASE) -cover
 
 save:
-	godep save
+	@godep save
