@@ -10,6 +10,10 @@ import (
 
 func simpleSandbox() *gopcp.Sandbox {
 	funcMap := map[string]*gopcp.BoxFunc{
+		"identity": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+			return args[0], nil
+		}),
+
 		"add": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 			var res float64
 			for _, arg := range args {

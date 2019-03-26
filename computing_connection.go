@@ -1,6 +1,7 @@
 package gopcp_rpc
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,6 +25,14 @@ type CommandPkt struct {
 	Data  CommandData `json:"data"`
 }
 
+func JSONMarshal(t interface{}) ([]byte, error) {
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	err := encoder.Encode(t)
+	return buffer.Bytes(), err
+}
+
 func stringToCommand(text string) (*CommandPkt, error) {
 	var cmd CommandPkt
 	err := json.Unmarshal([]byte(text), &cmd)
@@ -34,7 +43,7 @@ func stringToCommand(text string) (*CommandPkt, error) {
 }
 
 func commandToText(cmd CommandPkt) (string, error) {
-	bytes, err := json.Marshal(cmd)
+	bytes, err := JSONMarshal(cmd)
 	if err != nil {
 		return "", err
 	}
