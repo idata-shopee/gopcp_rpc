@@ -7,8 +7,8 @@ init-dep:
 status-dep:
 	@dep status
 
-ensure-dep:
-	@dep ensure
+update-dep:
+	@dep ensure -update
 
 test:
 	@go test -v -race
