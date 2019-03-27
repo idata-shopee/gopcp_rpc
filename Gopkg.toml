@@ -38,8 +38,8 @@
   name = "github.com/idata-shopee/gopool"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/satori/go.uuid"
+  version = "1.2.0"
 
 [prune]
   go-tests = true

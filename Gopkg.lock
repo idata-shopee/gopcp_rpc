@@ -19,19 +19,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8487e0b3ea9326517fdf290d1a0d5f091ea3a5a63853d79141bf88bdde86e555"
+  digest = "1:ca3681f6e4804d2b2d6ebfb237a2344f3309b61c462f637f03fbb2174f6ce97f"
   name = "github.com/idata-shopee/gopool"
   packages = ["."]
   pruneopts = "UT"
-  revision = "fc26f36461618ec8d729b3987ffec70f123072ee"
+  revision = "e16906167819826501f14fdb4e2971d28acdc79d"
 
 [[projects]]
-  branch = "master"
-  digest = "1:a3b8912deeef29007fab9a13a9f21b9e9b59c621a2ed61e2fe7b37320a71fbd5"
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b2ce2384e17bbe0c6d34077efa39dbab3e09123b"
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [solve-meta]
   analyzer-name = "dep"
