@@ -148,7 +148,7 @@ func (p *PCPConnectionHandler) onDataHelp(texts []string) {
 
 func (p *PCPConnectionHandler) CallRemote(command string, timeout time.Duration) (interface{}, error) {
 	// generate package with unique id
-	uid := uuid.NewV4()
+	uid := uuid.Must(uuid.NewV4())
 
 	id := uid.String()
 	data := CommandPkt{id, REQUEST_C_TYPE, CommandData{command, 0, ""}}
