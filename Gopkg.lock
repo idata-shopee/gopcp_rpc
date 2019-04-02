@@ -23,7 +23,7 @@
   name = "github.com/idata-shopee/gopool"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e16906167819826501f14fdb4e2971d28acdc79d"
+  revision = "e1576262f8643bd2a72e0a615ae31c1f103f6e86"
 
 [[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
