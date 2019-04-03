@@ -57,14 +57,14 @@ func getErrorMessage(err error) string {
 	return err.Error()
 }
 
-func executeRequestCommand(requestCommand *CommandPkt, pcpServer *gopcp.PcpServer) (interface{}, error) {
+func executeRequestCommand(requestCommand *CommandPkt, pcpServer *gopcp.PcpServer, attachment interface{}) (interface{}, error) {
 	// request command
 	text, ok := requestCommand.Data.Text.(string)
 	if !ok {
 		return nil, errors.New("Expect string for request command.")
 	}
 
-	return pcpServer.Execute(text, nil)
+	return pcpServer.Execute(text, attachment)
 }
 
 func packResponse(id string, text interface{}, err error) CommandPkt {
@@ -97,51 +97,45 @@ func (p *PCPConnectionHandler) OnData(chunk []byte) {
 
 func (p *PCPConnectionHandler) onDataHelp(texts []string) {
 	for _, text := range texts {
-		cmd, err := stringToCommand(text)
-		if err != nil {
+		if cmd, err := stringToCommand(text); err != nil {
 			// reset protocol
-			p.packageProtocol.Reset()
 			// can not trust rest data either
+			p.packageProtocol.Reset()
 			break
-		}
+		} else {
+			switch ctype := cmd.Ctype; ctype {
+			case REQUEST_C_TYPE:
+				// handle request from client
+				result, err := executeRequestCommand(cmd, p.pcpServer, p)
 
-		switch ctype := cmd.Ctype; ctype {
-		case REQUEST_C_TYPE:
-			// handle request from client
-			result, err := executeRequestCommand(cmd, p.pcpServer)
-			cmdText, cerr := commandToText(packResponse(cmd.Id, result, err))
-			if cerr != nil {
-				fmt.Printf("fail to convert command to string: %v", cerr)
-				fmt.Println()
-			}
+				if cmdText, err := commandToText(packResponse(cmd.Id, result, err)); err != nil {
+					// TODO do more than just log
+					fmt.Printf("fail to convert command to string: %v\n", err)
+				} else if err := p.packageProtocol.SendPackage(p.connHandler, cmdText); err != nil {
+					fmt.Printf("fail to sent package: %v\n", err)
+				}
 
-			sentErr := p.packageProtocol.SendPackage(p.connHandler, cmdText)
-			if sentErr != nil {
-				fmt.Printf("fail to sent package: %v", sentErr)
-				fmt.Println()
-			}
+			case RESPONSE_C_TYPE:
+				// handle response from server
+				if ch_raw, ok := p.remoteCallMap.Load(cmd.Id); !ok {
+					fmt.Printf("missing-pkt-id: can not find id %v in remote call map. Cmd content is %v. Normally, when timeout, the id also will be removed from remote call map.\n", cmd.Id, text)
+				} else {
+					// delete key
+					p.remoteCallMap.Delete(cmd.Id)
+					// pass to channel
+					ch, _ := ch_raw.(chan CallChannel)
+					if cmd.Data.Errno == 0 {
+						ch <- CallChannel{cmd.Data.Text, nil}
+					} else {
+						errText := cmd.Data.ErrMsg + "(" + strconv.Itoa(cmd.Data.Errno) + ")"
+						ch <- CallChannel{nil, errors.New(errText)}
+					}
+				}
 
-		case RESPONSE_C_TYPE:
-			// handle response from server
-			ch_raw, ok := p.remoteCallMap.Load(cmd.Id)
-			if !ok {
-				fmt.Printf("missing-pkt-id: can not find id %v in remote call map. Cmd content is %v. Normally, when timeout, the id also will be removed from remote call map.", cmd.Id, text)
-				fmt.Println()
-				return
+			default:
+				// impossible
+				fmt.Printf("unknown type of package. Type is %v\n", ctype)
 			}
-			// delete key
-			p.remoteCallMap.Delete(cmd.Id)
-			// pass to channel
-			ch, _ := ch_raw.(chan CallChannel)
-			if cmd.Data.Errno == 0 {
-				ch <- CallChannel{cmd.Data.Text, nil}
-			} else {
-				errText := cmd.Data.ErrMsg + "(" + strconv.Itoa(cmd.Data.Errno) + ")"
-				ch <- CallChannel{nil, errors.New(errText)}
-			}
-		default:
-			// impossible
-			fmt.Printf("unknown type of package. Type is %v", ctype)
 		}
 	}
 }
