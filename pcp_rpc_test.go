@@ -64,7 +64,7 @@ func testPCPRPCCallServer(expectFail bool, t *testing.T, callResult gopcp.CallRe
 	defer server.Close()
 
 	// create client
-	client, cerr := GetPCPRPCClient("127.0.0.1", server.GetPort(), func(e error) {})
+	client, cerr := GetPCPRPCClient("127.0.0.1", server.GetPort(), gopcp.GetSandbox(map[string]*gopcp.BoxFunc{}), func(e error) {})
 
 	if cerr != nil {
 		t.Errorf("fail to start client, %v", cerr)
@@ -100,7 +100,7 @@ func testPCPRPCPool(expectFail bool, t *testing.T, callResult gopcp.CallResult, 
 
 	pool := GetPCPRPCPool(func() (string, int, error) {
 		return "127.0.0.1", server.GetPort(), nil
-	}, 8, 30*time.Millisecond, 30*time.Millisecond)
+	}, gopcp.GetSandbox(map[string]*gopcp.BoxFunc{}), 8, 30*time.Millisecond, 30*time.Millisecond)
 	defer pool.Shutdown()
 
 	defer server.Close()
