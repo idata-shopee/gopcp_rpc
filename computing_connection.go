@@ -35,19 +35,19 @@ func JSONMarshal(t interface{}) ([]byte, error) {
 
 func stringToCommand(text string) (*CommandPkt, error) {
 	var cmd CommandPkt
-	err := json.Unmarshal([]byte(text), &cmd)
-	if err != nil {
+	if err := json.Unmarshal([]byte(text), &cmd); err != nil {
 		return nil, err
+	} else {
+		return &cmd, nil
 	}
-	return &cmd, nil
 }
 
 func commandToText(cmd CommandPkt) (string, error) {
-	bytes, err := JSONMarshal(cmd)
-	if err != nil {
+	if bytes, err := JSONMarshal(cmd); err != nil {
 		return "", err
+	} else {
+		return string(bytes[:]), nil
 	}
-	return string(bytes[:]), nil
 }
 
 var REQUEST_C_TYPE = "purecall-request"
@@ -57,14 +57,16 @@ func getErrorMessage(err error) string {
 	return err.Error()
 }
 
-func executeRequestCommand(requestCommand *CommandPkt, pcpServer *gopcp.PcpServer, attachment interface{}) (interface{}, error) {
+func executeRequestCommand(requestCommand *CommandPkt, pcpServer *gopcp.PcpServer, pch *PCPConnectionHandler) (interface{}, error) {
 	// request command
-	text, ok := requestCommand.Data.Text.(string)
-	if !ok {
+	if text, ok := requestCommand.Data.Text.(string); !ok {
 		return nil, errors.New("Expect string for request command.")
+	} else {
+		// add pch as default attribute to attachment of pcp execution
+		return pcpServer.Execute(text, map[string]interface{}{
+			"pch": pch,
+		})
 	}
-
-	return pcpServer.Execute(text, attachment)
 }
 
 func packResponse(id string, text interface{}, err error) CommandPkt {
@@ -147,32 +149,31 @@ func (p *PCPConnectionHandler) CallRemote(command string, timeout time.Duration)
 	id := uid.String()
 	data := CommandPkt{id, REQUEST_C_TYPE, CommandData{command, 0, ""}}
 
-	cmdText, cerr := commandToText(data)
-	if cerr != nil {
-		return nil, cerr
+	if cmdText, err := commandToText(data); err != nil {
+		return nil, err
+	} else {
+		// register channel
+		ch := make(chan CallChannel)
+		p.remoteCallMap.Store(id, ch)
+
+		// send package through connection
+		if err := p.packageProtocol.SendPackage(p.connHandler, cmdText); err != nil {
+			p.remoteCallMap.Delete(id)
+			return nil, err
+		} else {
+			// timeout action
+			go p.timeoutChannel(id, ch, command, timeout)
+
+			// wait for channel
+			ret := <-ch
+
+			if ret.err != nil {
+				return nil, ret.err
+			} else {
+				return ret.data, nil
+			}
+		}
 	}
-
-	// register channel
-	ch := make(chan CallChannel)
-	p.remoteCallMap.Store(id, ch)
-
-	// send package through connection
-	serr := p.packageProtocol.SendPackage(p.connHandler, cmdText)
-	if serr != nil {
-		p.remoteCallMap.Delete(id)
-		return nil, serr
-	}
-
-	// timeout action
-	go p.timeoutChannel(id, ch, command, timeout)
-
-	// wait for channel
-	ret := <-ch
-
-	if ret.err != nil {
-		return nil, ret.err
-	}
-	return ret.data, nil
 }
 
 func (p *PCPConnectionHandler) timeoutChannel(id string, ch chan CallChannel, command string, timeout time.Duration) {
@@ -182,12 +183,11 @@ func (p *PCPConnectionHandler) timeoutChannel(id string, ch chan CallChannel, co
 }
 
 func (p *PCPConnectionHandler) Call(list gopcp.CallResult, timeout time.Duration) (interface{}, error) {
-	cmdText, err := p.pcpClient.ToJSON(list)
-
-	if err != nil {
+	if cmdText, err := p.pcpClient.ToJSON(list); err != nil {
 		return nil, err
+	} else {
+		return p.CallRemote(cmdText, timeout)
 	}
-	return p.CallRemote(cmdText, timeout)
 }
 
 func (p *PCPConnectionHandler) Close() {
