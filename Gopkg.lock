@@ -19,6 +19,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:b19d9b55357e831e46a048a350887698c7e9b5146a4ef79d4bde5d0b65bec591"
+  name = "github.com/idata-shopee/gopcp_stream"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b66198216d74bd3d1c4c03dff2503dd138c98ca6"
+
+[[projects]]
+  branch = "master"
   digest = "1:ca3681f6e4804d2b2d6ebfb237a2344f3309b61c462f637f03fbb2174f6ce97f"
   name = "github.com/idata-shopee/gopool"
   packages = ["."]
@@ -39,6 +47,7 @@
   input-imports = [
     "github.com/idata-shopee/goaio",
     "github.com/idata-shopee/gopcp",
+    "github.com/idata-shopee/gopcp_stream",
     "github.com/idata-shopee/gopool",
     "github.com/satori/go.uuid",
   ]

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/idata-shopee/goaio"
 	"github.com/idata-shopee/gopcp"
+	"github.com/idata-shopee/gopcp_stream"
 	"github.com/satori/go.uuid"
 	"strconv"
 	"sync"
@@ -90,6 +91,7 @@ type PCPConnectionHandler struct {
 	pcpServer       *gopcp.PcpServer
 	connHandler     *goaio.ConnectionHandler
 	remoteCallMap   sync.Map
+	streamClient    *gopcp_stream.StreamClient
 }
 
 func (p *PCPConnectionHandler) OnData(chunk []byte) {
@@ -192,4 +194,9 @@ func (p *PCPConnectionHandler) Call(list gopcp.CallResult, timeout time.Duration
 
 func (p *PCPConnectionHandler) Close() {
 	p.connHandler.Close(nil)
+	p.Clean()
+}
+
+func (p *PCPConnectionHandler) Clean() {
+	p.streamClient.Clean()
 }
