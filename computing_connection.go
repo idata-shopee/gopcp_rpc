@@ -87,11 +87,11 @@ type CallChannel struct {
 
 type PCPConnectionHandler struct {
 	packageProtocol *PackageProtocol
-	pcpClient       gopcp.PcpClient
+	PcpClient       gopcp.PcpClient
 	pcpServer       *gopcp.PcpServer
 	connHandler     *goaio.ConnectionHandler
 	remoteCallMap   sync.Map
-	streamClient    *gopcp_stream.StreamClient
+	StreamClient    *gopcp_stream.StreamClient
 }
 
 func (p *PCPConnectionHandler) OnData(chunk []byte) {
@@ -185,7 +185,7 @@ func (p *PCPConnectionHandler) timeoutChannel(id string, ch chan CallChannel, co
 }
 
 func (p *PCPConnectionHandler) Call(list gopcp.CallResult, timeout time.Duration) (interface{}, error) {
-	if cmdText, err := p.pcpClient.ToJSON(list); err != nil {
+	if cmdText, err := p.PcpClient.ToJSON(list); err != nil {
 		return nil, err
 	} else {
 		return p.CallRemote(cmdText, timeout)
@@ -198,5 +198,5 @@ func (p *PCPConnectionHandler) Close() {
 }
 
 func (p *PCPConnectionHandler) Clean() {
-	p.streamClient.Clean()
+	p.StreamClient.Clean()
 }

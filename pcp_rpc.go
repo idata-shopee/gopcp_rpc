@@ -36,11 +36,11 @@ func GetPcpConnectionHandlerFromTcpConn(generateSandbox GenerateSandbox, getTcpC
 	pcpServer := gopcp.NewPcpServer(gopcp.GetSandbox(boxMap).Extend(generateSandbox(streamServer)))
 
 	pcpConnectionHandler = &PCPConnectionHandler{packageProtocol: GetPackageProtocol(),
-		pcpClient:     pcpClient,
+		PcpClient:     pcpClient,
 		pcpServer:     pcpServer,
 		connHandler:   nil,
 		remoteCallMap: remoteCallMap,
-		streamClient:  streamClient,
+		StreamClient:  streamClient,
 	}
 
 	if connHandler, err := getTcpConn(pcpConnectionHandler.OnData, func(error) {

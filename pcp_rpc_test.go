@@ -199,7 +199,7 @@ func TestStream(t *testing.T) {
 	for i := 1; i < 100; i++ {
 		ret := ""
 		// call stream api
-		exp, _ := client.streamClient.StreamCall("streamApi", "_", func(t int, d interface{}) {
+		exp, _ := client.StreamClient.StreamCall("streamApi", "_", func(t int, d interface{}) {
 			if t == gopcp_stream.STREAM_DATA {
 				ret += d.(string)
 			}
