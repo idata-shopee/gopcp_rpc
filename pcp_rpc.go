@@ -58,11 +58,11 @@ func GetPcpConnectionHandlerFromTcpConn(t int, generateSandbox GenerateSandbox, 
 
 // connection onConnected, onClose
 type ConnectionEvent struct {
-	onClose     goaio.OnCloseHandler
-	onConnected OnConnected
+	OnClose     goaio.OnCloseHandler
+	OnConnected OnConnectedHandler
 }
 
-type OnConnected = func(*PCPConnectionHandler)
+type OnConnectedHandler = func(*PCPConnectionHandler)
 
 // build pcp rpc server based on the tcp server itself
 func GetPCPRPCServer(port int, generateSandbox GenerateSandbox, cer func() *ConnectionEvent) (*goaio.TcpServer, error) {
@@ -76,7 +76,7 @@ func GetPCPRPCServer(port int, generateSandbox GenerateSandbox, cer func() *Conn
 		pcpConnectionHandler, _ := GetPcpConnectionHandlerFromTcpConn(0, generateSandbox, func(onData goaio.BytesReadHandler, onClose goaio.OnCloseHandler) (goaio.ConnectionHandler, error) {
 			connHandler = goaio.GetConnectionHandler(conn, onData, func(err error) {
 				if ce != nil {
-					ce.onClose(err)
+					ce.OnClose(err)
 				}
 				onClose(err)
 			})
@@ -84,7 +84,7 @@ func GetPCPRPCServer(port int, generateSandbox GenerateSandbox, cer func() *Conn
 		})
 
 		if ce != nil {
-			go ce.onConnected(pcpConnectionHandler)
+			go ce.OnConnected(pcpConnectionHandler)
 		}
 
 		return connHandler

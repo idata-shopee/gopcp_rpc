@@ -221,7 +221,7 @@ func TestOnConnected(t *testing.T) {
 		return gopcp.GetSandbox(map[string]*gopcp.BoxFunc{})
 	}, func() *ConnectionEvent {
 		return &ConnectionEvent{
-			onConnected: func(pcpConnectionHandler *PCPConnectionHandler) {
+			OnConnected: func(pcpConnectionHandler *PCPConnectionHandler) {
 				if v, err := pcpConnectionHandler.CallRemote(`["succ", 3]`, 10*time.Second); err != nil {
 					t.Errorf("fail, %v", err)
 				} else {
@@ -232,7 +232,7 @@ func TestOnConnected(t *testing.T) {
 
 				}
 			},
-			onClose: func(err error) {
+			OnClose: func(err error) {
 				//
 			},
 		}
