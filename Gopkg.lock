@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:46f71a12efeafb242f52acd2e593886ca32dfb720dd368d8ad7f4c20f13e8395"
+  digest = "1:141e42298899ea9afdf79d04031472538584877344c37c8da384e4830453fdca"
   name = "github.com/idata-shopee/goaio"
   packages = ["."]
   pruneopts = "UT"
-  revision = "11680595d15f930d459ae720dcf365657b21b1ee"
+  revision = "fd8d47c91f1785e6ec220088fa018334e9df3b6b"
 
 [[projects]]
   branch = "master"

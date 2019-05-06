@@ -115,7 +115,7 @@ func (p *PCPConnectionHandler) onDataHelp(texts []string) {
 				if cmdText, err := commandToText(packResponse(cmd.Id, result, err)); err != nil {
 					// TODO do more than just log
 					fmt.Printf("fail to convert command to string: %v\n", err)
-				} else if err := p.packageProtocol.SendPackage(p.connHandler, cmdText); err != nil {
+				} else if err = p.packageProtocol.SendPackage(p.connHandler, cmdText); err != nil {
 					fmt.Printf("fail to sent package: %v\n", err)
 				}
 

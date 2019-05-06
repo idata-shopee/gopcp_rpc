@@ -17,7 +17,7 @@ type GetTcpConn = func(goaio.BytesReadHandler, goaio.OnCloseHandler) (goaio.Conn
 
 type GenerateSandbox = func(*gopcp_stream.StreamServer) *gopcp.Sandbox
 
-func GetPcpConnectionHandlerFromTcpConn(generateSandbox GenerateSandbox, getTcpConn GetTcpConn) (*PCPConnectionHandler, error) {
+func GetPcpConnectionHandlerFromTcpConn(t int, generateSandbox GenerateSandbox, getTcpConn GetTcpConn) (*PCPConnectionHandler, error) {
 	var pcpConnectionHandler *PCPConnectionHandler
 	var remoteCallMap sync.Map
 
@@ -49,23 +49,43 @@ func GetPcpConnectionHandlerFromTcpConn(generateSandbox GenerateSandbox, getTcpC
 		return nil, err
 	} else {
 		pcpConnectionHandler.connHandler = &connHandler
+		if t == 1 {
+			go connHandler.ReadFromConn()
+		}
 		return pcpConnectionHandler, nil
 	}
 }
 
+// connection onConnected, onClose
+type ConnectionEvent struct {
+	onClose     goaio.OnCloseHandler
+	onConnected OnConnected
+}
+
+type OnConnected = func(*PCPConnectionHandler)
+
 // build pcp rpc server based on the tcp server itself
-func GetPCPRPCServer(port int, generateSandbox GenerateSandbox) (*goaio.TcpServer, error) {
+func GetPCPRPCServer(port int, generateSandbox GenerateSandbox, cer func() *ConnectionEvent) (*goaio.TcpServer, error) {
 	if tcpServer, err := goaio.GetTcpServer(port, func(conn net.Conn) goaio.ConnectionHandler {
 		var connHandler goaio.ConnectionHandler
+		var ce *ConnectionEvent = nil
+		if cer != nil {
+			ce = cer()
+		}
 
-		// TODO handle error when get pcp connection handler
-		GetPcpConnectionHandlerFromTcpConn(generateSandbox, func(onData goaio.BytesReadHandler, onClose goaio.OnCloseHandler) (goaio.ConnectionHandler, error) {
+		pcpConnectionHandler, _ := GetPcpConnectionHandlerFromTcpConn(0, generateSandbox, func(onData goaio.BytesReadHandler, onClose goaio.OnCloseHandler) (goaio.ConnectionHandler, error) {
 			connHandler = goaio.GetConnectionHandler(conn, onData, func(err error) {
+				if ce != nil {
+					ce.onClose(err)
+				}
 				onClose(err)
-				// TODO, handle when connection closed
 			})
 			return connHandler, nil
 		})
+
+		if ce != nil {
+			go ce.onConnected(pcpConnectionHandler)
+		}
 
 		return connHandler
 	}); err != nil {
@@ -78,10 +98,12 @@ func GetPCPRPCServer(port int, generateSandbox GenerateSandbox) (*goaio.TcpServe
 
 // build pcp client based on the tcp client itself
 func GetPCPRPCClient(host string, port int, generateSandbox GenerateSandbox, onClose goaio.OnCloseHandler) (*PCPConnectionHandler, error) {
-	return GetPcpConnectionHandlerFromTcpConn(generateSandbox, func(onData goaio.BytesReadHandler, closeHandle goaio.OnCloseHandler) (goaio.ConnectionHandler, error) {
+	return GetPcpConnectionHandlerFromTcpConn(1, generateSandbox, func(onData goaio.BytesReadHandler, closeHandle goaio.OnCloseHandler) (goaio.ConnectionHandler, error) {
 		return goaio.GetTcpClient(host, port, onData, func(err error) {
 			closeHandle(err)
-			onClose(err)
+			if onClose != nil {
+				onClose(err)
+			}
 		})
 	})
 }
@@ -95,7 +117,7 @@ func GetPCPRPCPool(getAddress GetAddress, generateSandbox GenerateSandbox, poolS
 		if host, port, err := getAddress(); err != nil {
 			return nil, err
 		} else {
-			if pcpConnectionHandler, err := GetPcpConnectionHandlerFromTcpConn(generateSandbox, func(onData goaio.BytesReadHandler, closeHandle goaio.OnCloseHandler) (goaio.ConnectionHandler, error) {
+			if pcpConnectionHandler, err := GetPcpConnectionHandlerFromTcpConn(1, generateSandbox, func(onData goaio.BytesReadHandler, closeHandle goaio.OnCloseHandler) (goaio.ConnectionHandler, error) {
 				return goaio.GetTcpClient(host, port, onData, func(err error) {
 					log.Printf("connection closed! remote-host=%s, remote-port=%s, errMsg=%s\n", host, strconv.Itoa(port), err)
 					closeHandle(err)

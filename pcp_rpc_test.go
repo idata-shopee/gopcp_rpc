@@ -58,7 +58,7 @@ func simpleSandbox(streamServer *gopcp_stream.StreamServer) *gopcp.Sandbox {
 
 // count: how many requests
 func testPCPRPCCallServer(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, timeout time.Duration, count int) {
-	server, err := GetPCPRPCServer(0, simpleSandbox)
+	server, err := GetPCPRPCServer(0, simpleSandbox, nil)
 	if err != nil {
 		t.Errorf("fail to start server, %v", err)
 	}
@@ -96,7 +96,7 @@ func testPCPRPCCallServer(expectFail bool, t *testing.T, callResult gopcp.CallRe
 }
 
 func testPCPRPCPool(expectFail bool, t *testing.T, callResult gopcp.CallResult, expect interface{}, timeout time.Duration, count int) {
-	server, err := GetPCPRPCServer(0, simpleSandbox)
+	server, err := GetPCPRPCServer(0, simpleSandbox, nil)
 	if err != nil {
 		t.Errorf("fail to start server, %v", err)
 	}
@@ -183,7 +183,7 @@ func TestStream(t *testing.T) {
 				return nil, nil
 			}),
 		})
-	})
+	}, nil)
 	if err != nil {
 		t.Errorf("fail to start server, %v", err)
 	}
@@ -207,4 +207,55 @@ func TestStream(t *testing.T) {
 		client.Call(*exp, 10*time.Second)
 		assertEqual(t, ret, "_1_2_3", "")
 	}
+}
+
+func TestOnConnected(t *testing.T) {
+	count := 120
+	var wg sync.WaitGroup
+	wg.Add(count)
+	var mux sync.Mutex
+
+	sum := 0.0
+
+	server, err := GetPCPRPCServer(0, func(streamServer *gopcp_stream.StreamServer) *gopcp.Sandbox {
+		return gopcp.GetSandbox(map[string]*gopcp.BoxFunc{})
+	}, func() *ConnectionEvent {
+		return &ConnectionEvent{
+			onConnected: func(pcpConnectionHandler *PCPConnectionHandler) {
+				if v, err := pcpConnectionHandler.CallRemote(`["succ", 3]`, 10*time.Second); err != nil {
+					t.Errorf("fail, %v", err)
+				} else {
+					mux.Lock()
+					sum += v.(float64)
+					mux.Unlock()
+					wg.Done()
+
+				}
+			},
+			onClose: func(err error) {
+				//
+			},
+		}
+	})
+	if err != nil {
+		t.Errorf("fail to start server, %v", err)
+	}
+	defer server.Close()
+
+	for i := 0; i < count; i++ {
+		_, err := GetPCPRPCClient("127.0.0.1", server.GetPort(), func(streamServer *gopcp_stream.StreamServer) *gopcp.Sandbox {
+			return gopcp.GetSandbox(map[string]*gopcp.BoxFunc{
+				"succ": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+					return args[0].(float64) + 1, nil
+				}),
+			})
+		}, nil)
+
+		if err != nil {
+			t.Errorf("fail to connect, %v", err)
+		}
+	}
+
+	wg.Wait()
+	assertEqual(t, sum, 4.0*float64(count), "")
 }
