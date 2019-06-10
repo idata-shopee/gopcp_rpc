@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/idata-shopee/gopcp"
 	rpc "github.com/idata-shopee/gopcp_rpc"
+	"github.com/idata-shopee/gopcp_stream"
 	"time"
 )
 
@@ -16,7 +18,9 @@ func main() {
 	flag.Parse()
 
 	// create client
-	if client, err := rpc.GetPCPRPCClient(*host, *port, func(e error) {
+	if client, err := rpc.GetPCPRPCClient(*host, *port, func(*gopcp_stream.StreamServer) *gopcp.Sandbox {
+		return gopcp.GetSandbox(map[string]*gopcp.BoxFunc{})
+	}, func(e error) {
 		if e != nil {
 			panic(e)
 		}
