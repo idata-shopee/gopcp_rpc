@@ -1,10 +1,10 @@
 package gopcp_rpc
 
 import (
-	"github.com/idata-shopee/goaio"
-	"github.com/idata-shopee/gopcp"
-	"github.com/idata-shopee/gopcp_stream"
-	"github.com/idata-shopee/gopool"
+	"github.com/lock-free/goaio"
+	"github.com/lock-free/gopcp"
+	"github.com/lock-free/gopcp_stream"
+	"github.com/lock-free/gopool"
 	"log"
 	"net"
 	"strconv"

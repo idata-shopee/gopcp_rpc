@@ -9,8 +9,8 @@ A golang RPC based on pcp protocol
 ```go
 import (
   "errors"
-	"github.com/idata-shopee/gopcp"
-	rpc "github.com/idata-shopee/gopcp_rpc"
+	"github.com/lock-free/gopcp"
+	rpc "github.com/lock-free/gopcp_rpc"
 )
 
 funcMap := map[string]*gopcp.BoxFunc{
@@ -43,8 +43,8 @@ if err != nil {
 ```go
 import (
   "time"
-	"github.com/idata-shopee/gopcp"
-	rpc "github.com/idata-shopee/gopcp_rpc"
+	"github.com/lock-free/gopcp"
+	rpc "github.com/lock-free/gopcp_rpc"
 )
 
 // create client

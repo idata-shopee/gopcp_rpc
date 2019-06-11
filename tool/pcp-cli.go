@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/idata-shopee/gopcp"
-	rpc "github.com/idata-shopee/gopcp_rpc"
-	"github.com/idata-shopee/gopcp_stream"
+	"github.com/lock-free/gopcp"
+	rpc "github.com/lock-free/gopcp_rpc"
+	"github.com/lock-free/gopcp_stream"
 	"time"
 )
 

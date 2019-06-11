@@ -27,15 +27,15 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/idata-shopee/goaio"
+  name = "github.com/lock-free/goaio"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/idata-shopee/gopcp"
+  name = "github.com/lock-free/gopcp"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/idata-shopee/gopool"
+  name = "github.com/lock-free/gopool"
 
 [[constraint]]
   name = "github.com/satori/go.uuid"

@@ -2,7 +2,7 @@ package gopcp_rpc
 
 import (
 	"encoding/binary"
-	"github.com/idata-shopee/goaio"
+	"github.com/lock-free/goaio"
 	"sync"
 )
 

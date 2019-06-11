@@ -2,8 +2,8 @@ package gopcp_rpc
 
 import (
 	"errors"
-	"github.com/idata-shopee/gopcp"
-	"github.com/idata-shopee/gopcp_stream"
+	"github.com/lock-free/gopcp"
+	"github.com/lock-free/gopcp_stream"
 	"sync"
 	"testing"
 	"time"
