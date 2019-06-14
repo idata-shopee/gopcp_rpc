@@ -176,10 +176,22 @@ func TestStream(t *testing.T) {
 				pcpServer *gopcp.PcpServer,
 			) (interface{}, error) {
 				seed := args[0].(string)
-				streamProducer.SendData(seed+"1", 10*time.Second)
-				streamProducer.SendData(seed+"2", 10*time.Second)
-				streamProducer.SendData(seed+"3", 10*time.Second)
-				streamProducer.SendEnd(10 * time.Second)
+				_, err := streamProducer.SendData(seed+"1", 10*time.Second)
+				if err != nil {
+					panic(err)
+				}
+				_, err = streamProducer.SendData(seed+"2", 10*time.Second)
+				if err != nil {
+					panic(err)
+				}
+				_, err = streamProducer.SendData(seed+"3", 10*time.Second)
+				if err != nil {
+					panic(err)
+				}
+				_, err = streamProducer.SendEnd(10 * time.Second)
+				if err != nil {
+					panic(err)
+				}
 				return nil, nil
 			}),
 		})
