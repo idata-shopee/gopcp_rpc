@@ -11,19 +11,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fea13936fe9c3baaa02f33b05b2936f34499604a142f5329cc0dc35921115761"
+  digest = "1:95eee653e5ee8faee62cd8427761127f50ad3e0c9d2c21c8a2cfed1b438826f8"
   name = "github.com/lock-free/gopcp"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8192b962db8fd9ad365e176ec04a7fd626c7af5b"
+  revision = "a1eb8ae43dbcc29ceb1af2fb4756ac43b3d64e63"
 
 [[projects]]
   branch = "master"
-  digest = "1:05bd9f48b6e6c79886513cad8e5efcf7faf75f13ac4e1a47229ecd71ac6cc709"
+  digest = "1:ba8b540c3454a7ed57b2eaf60538ce6ef916c3ec800976748bf9ee24d6dbcde1"
   name = "github.com/lock-free/gopcp_stream"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e2e8293feb12b5c4656fec75076ea937f6d2f3d0"
+  revision = "b45b7b7610c8e2ab7a3b7d12cbec79ff8e980688"
 
 [[projects]]
   branch = "master"
