@@ -6,6 +6,7 @@ import (
 	"github.com/lock-free/gopcp"
 	rpc "github.com/lock-free/gopcp_rpc"
 	"github.com/lock-free/gopcp_stream"
+        "encoding/json"
 	"time"
 )
 
@@ -30,7 +31,12 @@ func main() {
 		if ret, err := client.CallRemote(*text, time.Duration(*timeout)*time.Second); err != nil {
 			panic(err)
 		} else {
-			fmt.Printf("%v", ret)
+			s, err := json.Marshal(ret)
+			if err != nil {
+				fmt.Printf("%v", ret)
+			} else {
+				fmt.Printf("%s", s)
+			}
 			client.Close()
 		}
 	}
