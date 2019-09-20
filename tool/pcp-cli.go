@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/lock-free/gopcp"
@@ -30,7 +31,11 @@ func main() {
 		if ret, err := client.CallRemote(*text, time.Duration(*timeout)*time.Second); err != nil {
 			panic(err)
 		} else {
-			fmt.Printf("%v", ret)
+			bs, err := json.Marshal(ret)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("%s", string(bs))
 			client.Close()
 		}
 	}
