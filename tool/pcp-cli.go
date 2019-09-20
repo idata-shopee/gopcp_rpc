@@ -19,24 +19,28 @@ func main() {
 	flag.Parse()
 
 	// create client
-	if client, err := rpc.GetPCPRPCClient(*host, *port, func(*gopcp_stream.StreamServer) *gopcp.Sandbox {
+	client, err := rpc.GetPCPRPCClient(*host, *port, func(*gopcp_stream.StreamServer) *gopcp.Sandbox {
 		return gopcp.GetSandbox(map[string]*gopcp.BoxFunc{})
 	}, func(e error) {
 		if e != nil {
 			panic(e)
 		}
-	}); err != nil {
+	})
+
+	if err != nil {
 		panic(err)
-	} else {
-		if ret, err := client.CallRemote(*text, time.Duration(*timeout)*time.Second); err != nil {
-			panic(err)
-		} else {
-			bs, err := json.Marshal(ret)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Printf("%s", string(bs))
-			client.Close()
-		}
 	}
+	defer client.Close()
+
+	ret, err := client.CallRemote(*text, time.Duration(*timeout)*time.Second)
+
+	if err != nil {
+		panic(err)
+	}
+
+	bs, err := json.Marshal(ret)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s", string(bs))
 }

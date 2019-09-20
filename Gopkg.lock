@@ -19,11 +19,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c264793065d4da814d4e3a9f4bdf83d84864eb8db051a7aa91f2dc998c31158f"
+  digest = "1:874dcd3e0f61dffb8a5c29dd16fd9641b135075ee5812db8984587e8e2773fb8"
   name = "github.com/lock-free/gopcp_stream"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b2d7e1d0cac7168887edf5dd00bd9d7e22754a6d"
+  revision = "eae38c487ee2249f783756e1975edc9f7ed8c4b6"
 
 [[projects]]
   branch = "master"

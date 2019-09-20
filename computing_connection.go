@@ -185,11 +185,13 @@ func (p *PCPConnectionHandler) timeoutChannel(id string, ch chan CallChannel, co
 }
 
 func (p *PCPConnectionHandler) Call(list gopcp.CallResult, timeout time.Duration) (interface{}, error) {
-	if cmdText, err := p.PcpClient.ToJSON(list); err != nil {
+	cmdText, err := p.PcpClient.ToJSON(list)
+
+	if err != nil {
 		return nil, err
-	} else {
-		return p.CallRemote(cmdText, timeout)
 	}
+
+	return p.CallRemote(cmdText, timeout)
 }
 
 func (p *PCPConnectionHandler) Close() {

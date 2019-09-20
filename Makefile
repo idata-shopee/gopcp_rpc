@@ -17,7 +17,7 @@ build-mac:
 	@cd tool && GOOS=darwin GOARCH=amd64 go build -o ../bin/mac/pcp-cli
 
 build-linux:
-	@cd tool && GOOS=linux GOARCH=arm go build -o ../bin/linux/pcp-cli
+	@cd tool && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../bin/linux/pcp-cli
 
 cover:
 	@go test -coverprofile=coverage.out
