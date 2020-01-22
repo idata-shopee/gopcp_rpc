@@ -1,14 +1,14 @@
-GOPATH := $(shell cd ../../../.. && pwd)
-export GOPATH
+GO111MODULE := on
+export GO111MODULE
 
-init-dep:
-	@dep init
+init:
+	@go mod init
 
-status-dep:
-	@dep status
+clean:
+	@go mod tidy
 
-update-dep:
-	@dep ensure -update
+update:
+	@go list -m -u all
 
 test:
 	@go test -v -race
@@ -25,3 +25,5 @@ cover:
 
 test-only:
 	@go test -run $(CASE) -cover
+
+.PHONY: test
