@@ -38,7 +38,7 @@ func GetPcpConnectionHandlerFromTcpConn(t int, generateSandbox GenerateSandbox, 
 	pcpConnectionHandler = &PCPConnectionHandler{packageProtocol: GetPackageProtocol(),
 		PcpClient:     pcpClient,
 		pcpServer:     pcpServer,
-		connHandler:   nil,
+		ConnHandler:   nil,
 		remoteCallMap: remoteCallMap,
 		StreamClient:  streamClient,
 	}
@@ -48,7 +48,7 @@ func GetPcpConnectionHandlerFromTcpConn(t int, generateSandbox GenerateSandbox, 
 	}); err != nil {
 		return nil, err
 	} else {
-		pcpConnectionHandler.connHandler = &connHandler
+		pcpConnectionHandler.ConnHandler = &connHandler
 		if t == 1 {
 			go connHandler.ReadFromConn()
 		}

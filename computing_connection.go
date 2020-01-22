@@ -89,7 +89,7 @@ type PCPConnectionHandler struct {
 	packageProtocol *PackageProtocol
 	PcpClient       gopcp.PcpClient
 	pcpServer       *gopcp.PcpServer
-	connHandler     *goaio.ConnectionHandler
+	ConnHandler     *goaio.ConnectionHandler
 	remoteCallMap   sync.Map
 	StreamClient    *gopcp_stream.StreamClient
 }
@@ -115,7 +115,7 @@ func (p *PCPConnectionHandler) onDataHelp(texts []string) {
 				if cmdText, err := commandToText(packResponse(cmd.Id, result, err)); err != nil {
 					// TODO do more than just log
 					fmt.Printf("fail to convert command to string: %v\n", err)
-				} else if err = p.packageProtocol.SendPackage(p.connHandler, cmdText); err != nil {
+				} else if err = p.packageProtocol.SendPackage(p.ConnHandler, cmdText); err != nil {
 					fmt.Printf("fail to sent package: %v\n", err)
 				}
 
@@ -159,7 +159,7 @@ func (p *PCPConnectionHandler) CallRemote(command string, timeout time.Duration)
 		p.remoteCallMap.Store(id, ch)
 
 		// send package through connection
-		if err := p.packageProtocol.SendPackage(p.connHandler, cmdText); err != nil {
+		if err := p.packageProtocol.SendPackage(p.ConnHandler, cmdText); err != nil {
 			p.remoteCallMap.Delete(id)
 			return nil, err
 		} else {
@@ -195,7 +195,7 @@ func (p *PCPConnectionHandler) Call(list gopcp.CallResult, timeout time.Duration
 }
 
 func (p *PCPConnectionHandler) Close() {
-	p.connHandler.Close(nil)
+	p.ConnHandler.Close(nil)
 	p.Clean()
 }
 
