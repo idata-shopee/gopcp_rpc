@@ -14,6 +14,8 @@ github.com/lock-free/gopcp v0.0.0-20201003174023-e1bac94d9ff6 h1:jhTajGNmUWoz6cw
 github.com/lock-free/gopcp v0.0.0-20201003174023-e1bac94d9ff6/go.mod h1:oCDdmM8dVF6K1Tp/j1bsgg7/6BOx8kck0uWieRKgOTc=
 github.com/lock-free/gopcp_stream v0.0.0-20190920150102-eae38c487ee2 h1:Xe/hNV3O70UoqfCo2M4KHuxT8IMRCaQyBzJWbnpMF6I=
 github.com/lock-free/gopcp_stream v0.0.0-20190920150102-eae38c487ee2/go.mod h1:ozFeZLAmPWsBa3dB4y6PMgg+bb9/wbYfFhri42ylj/0=
+github.com/lock-free/gopcp_stream v0.0.0-20201003175511-d557307e2681 h1:OoAEYu9Kg/Ji++tFEtSUL9YbA6FVBW7wW4/76cGRAqM=
+github.com/lock-free/gopcp_stream v0.0.0-20201003175511-d557307e2681/go.mod h1:YMd4Y/UkLpEWqngCdSQjmJ4HPFjpNwNEGtEDDzxGYMw=
 github.com/lock-free/gopool v0.0.0-20190611034900-329206275cf0 h1:uuCzjJn7tQjlJ1DznRIDePhrTS3QSHCNP7sULz9oESw=
 github.com/lock-free/gopool v0.0.0-20190611034900-329206275cf0/go.mod h1:t3gxgFxZ4ezO3eR8lbx431lMFBD98x6hB0hBeuAe0nY=
 github.com/satori/go.uuid v1.2.0 h1:0uYX9dsZ2yD7q2RtLRtPSdGDWzjeM3TbMJP9utgA0ww=
