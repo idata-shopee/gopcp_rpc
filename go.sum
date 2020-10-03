@@ -10,6 +10,8 @@ github.com/lock-free/goaio v0.0.0-20190611034840-9d53a70585c6 h1:2rVS7kkSD7XkGCE
 github.com/lock-free/goaio v0.0.0-20190611034840-9d53a70585c6/go.mod h1:7N9IeW7FwDYB2gAWiFP/+bAJDrB0Lg8HDDmi9l5sWkw=
 github.com/lock-free/gopcp v0.0.0-20190920142302-f39bb882c4f9 h1:AlC1l4WAGnbQju9Zk3osFe1R2Z1ufs89hlh10V9Exec=
 github.com/lock-free/gopcp v0.0.0-20190920142302-f39bb882c4f9/go.mod h1:2h3GyZHpYH0CoaPaiWfJuONVknSb5nzaU1Wg26QgQ7U=
+github.com/lock-free/gopcp v0.0.0-20201003174023-e1bac94d9ff6 h1:jhTajGNmUWoz6cwwybMGVlqActEH/xEN6+WoUL2m5Kg=
+github.com/lock-free/gopcp v0.0.0-20201003174023-e1bac94d9ff6/go.mod h1:oCDdmM8dVF6K1Tp/j1bsgg7/6BOx8kck0uWieRKgOTc=
 github.com/lock-free/gopcp_stream v0.0.0-20190920150102-eae38c487ee2 h1:Xe/hNV3O70UoqfCo2M4KHuxT8IMRCaQyBzJWbnpMF6I=
 github.com/lock-free/gopcp_stream v0.0.0-20190920150102-eae38c487ee2/go.mod h1:ozFeZLAmPWsBa3dB4y6PMgg+bb9/wbYfFhri42ylj/0=
 github.com/lock-free/gopool v0.0.0-20190611034900-329206275cf0 h1:uuCzjJn7tQjlJ1DznRIDePhrTS3QSHCNP7sULz9oESw=

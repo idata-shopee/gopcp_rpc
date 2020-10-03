@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"time"
+
 	"github.com/lock-free/gopcp"
 	rpc "github.com/lock-free/gopcp_rpc"
 	"github.com/lock-free/gopcp_stream"
-	"time"
 )
 
 func main() {

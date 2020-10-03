@@ -1,9 +1,6 @@
 GO111MODULE := on
 export GO111MODULE
 
-init:
-	@go mod init
-
 clean:
 	@go mod tidy
 
